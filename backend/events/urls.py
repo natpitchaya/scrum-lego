@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import EventListView
+from .views import EventListView, home
 
 urlpatterns = [
-    path('', EventListView.as_view(), name='events-list'),
+    path('', home, name='home'),
+    path('api/events/', EventListView.as_view(), name='event-list'),
 ]

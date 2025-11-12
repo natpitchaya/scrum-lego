@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yale Events Aggregator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 {
+            color: #00356b;
+            border-bottom: 3px solid #00356b;
+            padding-bottom: 10px;
+        }
+        .card {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #00356b;
+        }
+        .endpoint {
+            background: #fff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .endpoint h3 {
+            margin-top: 0;
+            color: #00356b;
+        }
+        .url {
+            background: #f0f0f0;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            word-break: break-all;
+        }
+        a {
+            color: #00356b;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .button {
+            display: inline-block;
+            background: #00356b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .button:hover {
+            background: #005a9c;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎓 Yale Events Aggregator</h1>
+    
+    <div class="card">
+        <p>Welcome! This application aggregates events from multiple Yale websites into a single API.</p>
+        <p><strong>Sources:</strong> Yale School of Management (SOM) and Yale School of Public Health (YSPH)</p>
+    </div>
+
+    <h2>📡 API Endpoints</h2>
+
+    <div class="endpoint">
+        <h3>All Events</h3>
+        <p>Get all aggregated events from both sources</p>
+        <div class="url">/api/events/</div>
+        <a href="/api/events/" class="button">View All Events</a>
+    </div>
+
+    <div class="endpoint">
+        <h3>Filter by Source</h3>
+        <p>Get events from a specific source</p>
+        <div class="url">/api/events/?source=SOM</div>
+        <a href="/api/events/?source=SOM" class="button">View SOM Events</a>
+        <br>
+        <div class="url" style="margin-top: 10px;">/api/events/?source=YSPH</div>
+        <a href="/api/events/?source=YSPH" class="button">View YSPH Events</a>
+    </div>
+
+    <div class="endpoint">
+        <h3>Pagination</h3>
+        <p>Use limit and offset parameters for pagination</p>
+        <div class="url">/api/events/?limit=10&offset=0</div>
+        <a href="/api/events/?limit=10&offset=0" class="button">View First 10 Events</a>
+    </div>
+
+    <h2>🔧 Admin Panel</h2>
+    <div class="endpoint">
+        <p>Access the Django admin interface to manage events</p>
+        <div class="url">/admin/</div>
+        <a href="/admin/" class="button">Go to Admin</a>
+    </div>
+
+    <h2>📄 API Response Format</h2>
+    <div class="card">
+        <pre style="background: white; padding: 15px; border-radius: 4px; overflow-x: auto;">
+{
+    "count": 320,
+    "next": "http://example.com/api/events/?limit=50&offset=50",
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "title": "Event Title",
+            "description": "Event description...",
+            "start_time": "2025-11-15T18:00:00Z",
+            "end_time": "2025-11-15T20:00:00Z",
+            "location": "Event location",
+            "source": "SOM",
+            "url": "https://...",
+            "created_at": "2025-11-12T10:00:00Z"
+        }
+    ]
+}
+        </pre>
+    </div>
+
+    <footer style="margin-top: 50px; text-align: center; color: #666; font-size: 14px;">
+        <p>Yale Events Aggregator | Built with Django & Django REST Framework</p>
+    </footer>
+</body>
+</html>

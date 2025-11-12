@@ -9,12 +9,20 @@ def events_home(request):
     return render(request, 'events_list.html')
 
 
-class EventListView(generics.ListAPIView):
-    queryset = Event.objects.all().order_by('start_time')
-    serializer_class = EventSerializer
+from django.shortcuts import render
+from rest_framework import generics
+from .models import Event
+from .serializers import EventSerializer
 
+def home(request):
+    """Homepage with API documentation"""
+    return render(request, 'home.html')
+
+class EventListView(generics.ListAPIView):
+    serializer_class = EventSerializer
+    
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = Event.objects.all()
         source = self.request.query_params.get('source', None)
         if source:
             queryset = queryset.filter(source=source)
