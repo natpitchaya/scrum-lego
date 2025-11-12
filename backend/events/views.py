@@ -10,13 +10,44 @@ def events_home(request):
 
 
 from django.shortcuts import render
+from django.http import JsonResponse
 from rest_framework import generics
 from .models import Event
 from .serializers import EventSerializer
+from django.core.management import call_command
+import io
 
 def home(request):
     """Homepage with API documentation"""
     return render(request, 'home.html')
+
+def fetch_events_view(request):
+    """Trigger event fetching manually via web interface"""
+    if request.method == 'POST':
+        try:
+            # Capture command output
+            out = io.StringIO()
+            call_command('fetch_events', stdout=out)
+            output = out.getvalue()
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Events fetched successfully',
+                'output': output,
+                'event_count': Event.objects.count()
+            })
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
+    
+    # GET request - show current stats
+    return JsonResponse({
+        'event_count': Event.objects.count(),
+        'som_count': Event.objects.filter(source='SOM').count(),
+        'ysph_count': Event.objects.filter(source='YSPH').count(),
+        'message': 'Send POST request to /fetch/ to trigger event fetching'
+    })
 
 class EventListView(generics.ListAPIView):
     serializer_class = EventSerializer
