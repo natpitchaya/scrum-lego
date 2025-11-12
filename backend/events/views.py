@@ -11,6 +11,7 @@ def events_home(request):
 
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
 from .models import Event
 from .serializers import EventSerializer
@@ -21,6 +22,7 @@ def home(request):
     """Homepage with API documentation"""
     return render(request, 'home.html')
 
+@csrf_exempt
 def fetch_events_view(request):
     """Trigger event fetching manually via web interface"""
     if request.method == 'POST':
