@@ -9,12 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-change-in-production')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# Parse ALLOWED_HOSTS
-allowed_hosts_str = os.getenv('ALLOWED_HOSTS', '')
-if allowed_hosts_str:
-    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(',')]
-else:
-    ALLOWED_HOSTS = ['*']
+# Always allow all hosts in production if ALLOWED_HOSTS is not set
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
