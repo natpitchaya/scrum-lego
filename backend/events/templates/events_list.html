@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yale Events Aggregator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --yale-blue: #00356b;
+            --yale-light-blue: #5f9ed1;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--yale-blue) 0%, var(--yale-light-blue) 100%);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--yale-blue) 0%, var(--yale-light-blue) 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .filter-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            position: sticky;
+            top: 20px;
+        }
+        
+        .event-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-left: 4px solid var(--yale-blue);
+        }
+        
+        .event-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .event-title {
+            color: var(--yale-blue);
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .event-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .event-meta i {
+            margin-right: 0.25rem;
+        }
+        
+        .badge-source {
+            font-size: 0.85rem;
+            padding: 0.4rem 0.8rem;
+            font-weight: 500;
+        }
+        
+        .badge-yale-som {
+            background-color: #0f4d92;
+        }
+        
+        .badge-ysph {
+            background-color: #286dc0;
+        }
+        
+        .badge-yale-events {
+            background-color: #63aaff;
+        }
+        
+        .event-description {
+            color: #495057;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .filter-label {
+            font-weight: 600;
+            color: var(--yale-blue);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--yale-light-blue);
+            box-shadow: 0 0 0 0.2rem rgba(95, 158, 209, 0.25);
+        }
+        
+        .btn-primary {
+            background-color: var(--yale-blue);
+            border-color: var(--yale-blue);
+        }
+        
+        .btn-primary:hover {
+            background-color: #002a54;
+            border-color: #002a54;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        
+        .stats-badge {
+            background: white;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .truncate-3-lines {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .read-more {
+            color: var(--yale-light-blue);
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .read-more:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-section">
+        <div class="container">
+            <h1 class="display-4 fw-bold">
+                <i class="bi bi-calendar-event"></i> Yale Events Aggregator
+            </h1>
+            <p class="lead">Discover events from Yale SOM, YSPH, and Yale Events in one place</p>
+            <div class="stats-badge">
+                <strong id="total-events">Loading...</strong> events available
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <!-- Filters Sidebar -->
+            <div class="col-lg-3">
+                <div class="filter-card">
+                    <h5 class="mb-3">
+                        <i class="bi bi-funnel"></i> Filters
+                    </h5>
+                    
+                    <!-- Search -->
+                    <div class="mb-3">
+                        <label class="filter-label">
+                            <i class="bi bi-search"></i> Search
+                        </label>
+                        <input type="text" class="form-control" id="search-input" placeholder="Search events...">
+                    </div>
+                    
+                    <!-- Source Filter -->
+                    <div class="mb-3">
+                        <label class="filter-label">
+                            <i class="bi bi-building"></i> Organization
+                        </label>
+                        <select class="form-select" id="source-filter">
+                            <option value="">All Organizations</option>
+                            <option value="Yale SOM">Yale SOM</option>
+                            <option value="YSPH">YSPH</option>
+                            <option value="Yale Events">Yale Events</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Date Range -->
+                    <div class="mb-3">
+                        <label class="filter-label">
+                            <i class="bi bi-calendar-range"></i> Date Range
+                        </label>
+                        <input type="date" class="form-control mb-2" id="start-date" placeholder="Start date">
+                        <input type="date" class="form-control" id="end-date" placeholder="End date">
+                    </div>
+                    
+                    <!-- Apply/Reset Buttons -->
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" id="apply-filters">
+                            <i class="bi bi-check-circle"></i> Apply Filters
+                        </button>
+                        <button class="btn btn-outline-secondary" id="reset-filters">
+                            <i class="bi bi-arrow-counterclockwise"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Events List -->
+            <div class="col-lg-9">
+                <div class="loading-spinner" id="loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading events...</p>
+                </div>
+                
+                <div id="events-container"></div>
+                
+                <div class="no-results" id="no-results" style="display: none;">
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: #dee2e6;"></i>
+                    <h4 class="mt-3">No events found</h4>
+                    <p>Try adjusting your filters or search terms</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allEvents = [];
+        
+        // Fetch events from API
+        async function fetchEvents() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('events-container').innerHTML = '';
+                
+                const response = await fetch('/api/events/?limit=1000');
+                const data = await response.json();
+                allEvents = data.results;
+                
+                document.getElementById('total-events').textContent = allEvents.length;
+                renderEvents(allEvents);
+            } catch (error) {
+                console.error('Error fetching events:', error);
+                document.getElementById('events-container').innerHTML = 
+                    '<div class="alert alert-danger">Error loading events. Please try again.</div>';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        // Render events to the page
+        function renderEvents(events) {
+            const container = document.getElementById('events-container');
+            const noResults = document.getElementById('no-results');
+            
+            if (events.length === 0) {
+                container.innerHTML = '';
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            noResults.style.display = 'none';
+            
+            container.innerHTML = events.map(event => {
+                const date = new Date(event.start_time);
+                const dateStr = date.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                const timeStr = date.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit' 
+                });
+                
+                const badgeClass = event.source === 'Yale SOM' ? 'badge-yale-som' : 
+                                   event.source === 'YSPH' ? 'badge-ysph' : 'badge-yale-events';
+                
+                const description = event.description || 'No description available';
+                const shortDesc = description.length > 300 ? description.substring(0, 300) + '...' : description;
+                const needsReadMore = description.length > 300;
+                
+                return `
+                    <div class="event-card">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h3 class="event-title flex-grow-1">${event.title}</h3>
+                            <span class="badge ${badgeClass} badge-source">${event.source}</span>
+                        </div>
+                        
+                        <div class="event-meta">
+                            <span><i class="bi bi-calendar3"></i> ${dateStr}</span>
+                            <span><i class="bi bi-clock"></i> ${timeStr}</span>
+                            ${event.location ? `<span><i class="bi bi-geo-alt"></i> ${event.location}</span>` : ''}
+                        </div>
+                        
+                        <div class="event-description" id="desc-${event.id}">
+                            <div class="description-text">${shortDesc}</div>
+                            ${needsReadMore ? `
+                                <a class="read-more" onclick="toggleDescription(${event.id}, \`${description.replace(/`/g, '\\`').replace(/\n/g, ' ')}\`)">
+                                    Read more <i class="bi bi-chevron-down"></i>
+                                </a>
+                            ` : ''}
+                        </div>
+                        
+                        ${event.url ? `
+                            <a href="${event.url}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-link-45deg"></i> View Details
+                            </a>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Toggle description expansion
+        function toggleDescription(eventId, fullText) {
+            const descEl = document.getElementById(`desc-${eventId}`);
+            const textEl = descEl.querySelector('.description-text');
+            const linkEl = descEl.querySelector('.read-more');
+            
+            if (linkEl.textContent.includes('Read more')) {
+                textEl.textContent = fullText;
+                linkEl.innerHTML = 'Read less <i class="bi bi-chevron-up"></i>';
+            } else {
+                const shortText = fullText.length > 300 ? fullText.substring(0, 300) + '...' : fullText;
+                textEl.textContent = shortText;
+                linkEl.innerHTML = 'Read more <i class="bi bi-chevron-down"></i>';
+            }
+        }
+        
+        // Filter events
+        function filterEvents() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const sourceFilter = document.getElementById('source-filter').value;
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            
+            let filtered = allEvents.filter(event => {
+                // Search filter
+                const matchesSearch = !searchTerm || 
+                    event.title.toLowerCase().includes(searchTerm) ||
+                    (event.description && event.description.toLowerCase().includes(searchTerm)) ||
+                    (event.location && event.location.toLowerCase().includes(searchTerm));
+                
+                // Source filter
+                const matchesSource = !sourceFilter || event.source === sourceFilter;
+                
+                // Date range filter
+                const eventDate = new Date(event.start_time);
+                const matchesStartDate = !startDate || eventDate >= new Date(startDate);
+                const matchesEndDate = !endDate || eventDate <= new Date(endDate + 'T23:59:59');
+                
+                return matchesSearch && matchesSource && matchesStartDate && matchesEndDate;
+            });
+            
+            renderEvents(filtered);
+        }
+        
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('source-filter').value = '';
+            document.getElementById('start-date').value = '';
+            document.getElementById('end-date').value = '';
+            renderEvents(allEvents);
+        }
+        
+        // Event listeners
+        document.getElementById('apply-filters').addEventListener('click', filterEvents);
+        document.getElementById('reset-filters').addEventListener('click', resetFilters);
+        document.getElementById('search-input').addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') filterEvents();
+        });
+        
+        // Load events on page load
+        fetchEvents();
+    </script>
+</body>
+</html>
