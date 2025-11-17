@@ -16,8 +16,14 @@ def make_uid(url: str, title: str = '') -> str:
 
 
 def parse_date(text: str):
+    """Parse a date string and return a timezone-aware datetime object."""
     try:
-        return dateparser.parse(text)
+        dt = dateparser.parse(text)
+        if dt:
+            # Make timezone-aware if naive
+            if dt.tzinfo is None:
+                dt = timezone.make_aware(dt)
+        return dt
     except Exception:
         return None
 
