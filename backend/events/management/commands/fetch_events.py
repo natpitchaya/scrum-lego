@@ -104,13 +104,35 @@ def fetch_som_api(limit: int = 200):
         title = obj.get('p3') or obj.get('p1')
         dates_html = obj.get('p4') or ''
         date_text = BeautifulSoup(dates_html, 'html.parser').get_text(' ', strip=True) if dates_html else ''
+        
+        # Parse start and end dates from the date_text
+        start_dt = None
+        end_dt = None
+        if date_text:
+            # Date format: "Sat, Nov 1, 2025 12:00 AM – Sun, Nov 30, 2025 11:55 PM"
+            parts = date_text.split('–') if '–' in date_text else date_text.split('-')
+            if len(parts) >= 1:
+                start_dt = parse_date(parts[0].strip())
+            if len(parts) >= 2:
+                end_dt = parse_date(parts[1].strip())
+        
         loc = obj.get('p6') or ''
         rel = obj.get('p18') or ''
         url_full = requests.compat.urljoin(base, rel) if rel else None
         description_html = obj.get('p30') or ''
         description = BeautifulSoup(description_html, 'html.parser').get_text(' ', strip=True) if description_html else ''
         uid = obj.get('p2') or make_uid(url_full or title or date_text)
-        items.append({'title': title, 'url': url_full, 'date_text': date_text, 'source': 'Yale SOM', 'description': description, 'uid': uid, 'location': loc})
+        items.append({
+            'title': title, 
+            'url': url_full, 
+            'date_text': date_text, 
+            'source': 'Yale SOM', 
+            'description': description, 
+            'uid': uid, 
+            'location': loc,
+            'start_dt': start_dt,
+            'end_dt': end_dt
+        })
     return items
 
 

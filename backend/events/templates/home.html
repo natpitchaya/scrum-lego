@@ -3,138 +3,715 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yale Events Aggregator</title>
+    <title>Yale Events Calendar</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
+            background: linear-gradient(135deg, #00356b 0%, #286dc0 100%);
+            min-height: 100vh;
             padding: 20px;
-            line-height: 1.6;
-            color: #333;
         }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
         h1 {
-            color: #00356b;
-            border-bottom: 3px solid #00356b;
-            padding-bottom: 10px;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
-        .card {
-            background: #f5f5f5;
-            padding: 20px;
-            margin: 20px 0;
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .search-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            font-size: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #00356b;
+            box-shadow: 0 0 0 3px rgba(0, 53, 107, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .filter-group select,
+        .filter-group input[type="date"] {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
-            border-left: 4px solid #00356b;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: white;
         }
-        .endpoint {
-            background: #fff;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 4px;
-            border: 1px solid #ddd;
+
+        .filter-group select:focus,
+        .filter-group input[type="date"]:focus {
+            outline: none;
+            border-color: #00356b;
         }
-        .endpoint h3 {
-            margin-top: 0;
+
+        .clear-filters {
+            padding: 10px 20px;
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .clear-filters:hover {
+            background: #e0e0e0;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .stats-text {
+            font-size: 1.1rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        .events-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            border-left: 5px solid #00356b;
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .event-title {
+            font-size: 1.4rem;
             color: #00356b;
+            font-weight: 700;
+            margin-bottom: 10px;
+            line-height: 1.3;
+            cursor: pointer;
+            transition: color 0.3s;
         }
-        .url {
-            background: #f0f0f0;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            word-break: break-all;
-        }
-        a {
-            color: #00356b;
-            text-decoration: none;
-        }
-        a:hover {
+
+        .event-title:hover {
+            color: #286dc0;
             text-decoration: underline;
         }
-        .button {
+
+        .event-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .event-title a:hover {
+            color: #286dc0;
+        }
+
+        .event-source {
             display: inline-block;
+            padding: 6px 12px;
             background: #00356b;
             color: white;
-            padding: 10px 20px;
-            border-radius: 4px;
-            margin-top: 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
         }
-        .button:hover {
-            background: #005a9c;
+
+        .event-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+            color: #666;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .meta-icon {
+            font-size: 1.1rem;
+        }
+
+        .event-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .event-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #00356b;
+            color: white;
             text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .event-link:hover {
+            background: #286dc0;
+            transform: translateX(5px);
+        }
+
+        .calendar-export {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .export-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: #f5f5f5;
+            color: #333;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 1px solid #e0e0e0;
+        }
+
+        .export-btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .export-label {
+            color: #666;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .no-results-text {
+            font-size: 1.3rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .no-results-subtext {
+            color: #999;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .pagination button {
+            padding: 12px 24px;
+            background: #00356b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #286dc0;
+            transform: scale(1.05);
+        }
+
+        .pagination button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .pagination-info {
+            font-size: 1rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .event-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .pagination {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .pagination button {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>🎓 Yale Events Aggregator</h1>
-    
-    <div class="card">
-        <p>Welcome! This application aggregates events from multiple Yale websites into a single API.</p>
-        <p><strong>Sources:</strong> Yale School of Management (Yale SOM), Yale School of Public Health (YSPH), and Yale Events</p>
+    <div class="container">
+        <header>
+            <h1>🎓 Yale Events Calendar</h1>
+            <p class="subtitle">Discover events from Yale SOM, YSPH, and Campus-wide</p>
+        </header>
+
+        <div class="search-container">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search events by name or keyword..."
+                    oninput="searchEvents()"
+                >
+                <span class="search-icon">🔍</span>
+            </div>
+
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="sourceFilter">Organization</label>
+                    <select id="sourceFilter" onchange="searchEvents()">
+                        <option value="">All Organizations</option>
+                        <option value="Yale SOM">Yale SOM</option>
+                        <option value="YSPH">YSPH</option>
+                        <option value="Yale Events">Yale Events (Campus-wide)</option>
+                        <option value="Yale School of Medicine">Yale School of Medicine</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate" onchange="searchEvents()">
+                </div>
+
+                <div class="filter-group">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate" onchange="searchEvents()">
+                </div>
+
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="clear-filters" onclick="clearFilters()">Clear Filters</button>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stats-text" id="resultsCount">Loading events...</div>
+            </div>
+        </div>
+
+        <div id="eventsContainer">
+            <div class="loading">Loading events...</div>
+        </div>
     </div>
 
-    <h2>📡 API Endpoints</h2>
+    <script>
+        let allEvents = [];
+        let filteredEvents = [];
+        let currentPage = 1;
+        const eventsPerPage = 25;
 
-    <div class="endpoint">
-        <h3>All Events</h3>
-        <p>Get all aggregated events from both sources</p>
-        <div class="url">/api/events/</div>
-        <a href="/api/events/" class="button">View All Events</a>
-    </div>
-
-    <div class="endpoint">
-        <h3>Filter by Source</h3>
-        <p>Get events from a specific source</p>
-        <div class="url">/api/events/?source=Yale SOM</div>
-        <a href="/api/events/?source=Yale SOM" class="button">View Yale SOM Events</a>
-        <br>
-        <div class="url" style="margin-top: 10px;">/api/events/?source=YSPH</div>
-        <a href="/api/events/?source=YSPH" class="button">View YSPH Events</a>
-        <br>
-        <div class="url" style="margin-top: 10px;">/api/events/?source=Yale Events</div>
-        <a href="/api/events/?source=Yale Events" class="button">View Yale Events</a>
-    </div>
-
-    <div class="endpoint">
-        <h3>Pagination</h3>
-        <p>Use limit and offset parameters for pagination</p>
-        <div class="url">/api/events/?limit=10&offset=0</div>
-        <a href="/api/events/?limit=10&offset=0" class="button">View First 10 Events</a>
-    </div>
-
-    <h2>🔧 Admin Panel</h2>
-    <div class="endpoint">
-        <p>Access the Django admin interface to manage events</p>
-        <div class="url">/admin/</div>
-        <a href="/admin/" class="button">Go to Admin</a>
-    </div>
-
-    <h2>📄 API Response Format</h2>
-    <div class="card">
-        <pre style="background: white; padding: 15px; border-radius: 4px; overflow-x: auto;">
-{
-    "count": 320,
-    "next": "http://example.com/api/events/?limit=50&offset=50",
-    "previous": null,
-    "results": [
-        {
-            "id": 1,
-            "title": "Event Title",
-            "description": "Event description...",
-            "start_time": "2025-11-15T18:00:00Z",
-            "end_time": "2025-11-15T20:00:00Z",
-            "location": "Event location",
-            "source": "SOM",
-            "url": "https://...",
-            "created_at": "2025-11-12T10:00:00Z"
+        async function loadEvents() {
+            try {
+                const response = await fetch('/api/events/?limit=1000');
+                const data = await response.json();
+                allEvents = data.results || [];
+                
+                // Sort events by start_time (most upcoming first)
+                allEvents.sort((a, b) => {
+                    const dateA = new Date(a.start_time);
+                    const dateB = new Date(b.start_time);
+                    return dateA - dateB;
+                });
+                
+                searchEvents();
+            } catch (error) {
+                console.error('Error loading events:', error);
+                document.getElementById('eventsContainer').innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">⚠️</div>
+                        <div class="no-results-text">Error loading events</div>
+                        <div class="no-results-subtext">Please try again later</div>
+                    </div>
+                `;
+            }
         }
-    ]
-}
-        </pre>
-    </div>
 
-    <footer style="margin-top: 50px; text-align: center; color: #666; font-size: 14px;">
-        <p>Yale Events Aggregator | Built with Django & Django REST Framework</p>
-    </footer>
+        function searchEvents() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            const source = document.getElementById('sourceFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            let filtered = allEvents;
+
+            // Filter by keyword
+            if (keyword) {
+                filtered = filtered.filter(event => 
+                    (event.title && event.title.toLowerCase().includes(keyword)) ||
+                    (event.description && event.description.toLowerCase().includes(keyword))
+                );
+            }
+
+            // Filter by source
+            if (source) {
+                filtered = filtered.filter(event => event.source === source);
+            }
+
+            // Filter by date range
+            if (startDate) {
+                filtered = filtered.filter(event => {
+                    const eventDate = new Date(event.start_time);
+                    return eventDate >= new Date(startDate);
+                });
+            }
+
+            if (endDate) {
+                filtered = filtered.filter(event => {
+                    const eventDate = new Date(event.start_time);
+                    return eventDate <= new Date(endDate + 'T23:59:59');
+                });
+            }
+
+            filteredEvents = filtered;
+            currentPage = 1;
+            displayEvents();
+        }
+
+        function displayEvents() {
+            const container = document.getElementById('eventsContainer');
+            const resultsCount = document.getElementById('resultsCount');
+
+            const totalEvents = filteredEvents.length;
+            const totalPages = Math.ceil(totalEvents / eventsPerPage);
+            const startIndex = (currentPage - 1) * eventsPerPage;
+            const endIndex = startIndex + eventsPerPage;
+            const eventsToShow = filteredEvents.slice(startIndex, endIndex);
+
+            resultsCount.textContent = `Showing ${totalEvents} event${totalEvents !== 1 ? 's' : ''}`;
+
+            if (totalEvents === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">🔍</div>
+                        <div class="no-results-text">No events found</div>
+                        <div class="no-results-subtext">Try adjusting your filters or search terms</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const eventsHTML = eventsToShow.map(event => {
+                const eventDate = new Date(event.start_time);
+                const formattedDate = eventDate.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                const formattedTime = eventDate.toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit'
+                });
+
+                const description = event.description 
+                    ? (event.description.length > 300 
+                        ? event.description.substring(0, 300) + '...' 
+                        : event.description)
+                    : 'No description available';
+
+                return `
+                    <div class="event-card">
+                        <div class="event-header">
+                            <div>
+                                <h2 class="event-title">
+                                    ${event.url 
+                                        ? `<a href="${event.url}" target="_blank">${event.title || 'Untitled Event'}</a>` 
+                                        : (event.source === 'YSPH' 
+                                            ? `<a href="https://ysph.yale.edu/yale-school-of-public-health-event-calendar/" target="_blank">${event.title || 'Untitled Event'}</a>`
+                                            : (event.title || 'Untitled Event'))
+                                    }
+                                </h2>
+                            </div>
+                            <span class="event-source">${event.source || 'Unknown'}</span>
+                        </div>
+                        
+                        <div class="event-meta">
+                            <div class="meta-item">
+                                <span class="meta-icon">📅</span>
+                                <span>${formattedDate}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">🕒</span>
+                                <span>${formattedTime}</span>
+                            </div>
+                            ${event.location ? `
+                            <div class="meta-item">
+                                <span class="meta-icon">📍</span>
+                                <span>${event.location}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+
+                        <p class="event-description">${description}</p>
+
+                        ${event.url ? `
+                            <a href="${event.url}" target="_blank" class="event-link">
+                                View Details →
+                            </a>
+                        ` : (event.source === 'YSPH' ? `
+                            <a href="https://ysph.yale.edu/yale-school-of-public-health-event-calendar/" target="_blank" class="event-link">
+                                View YSPH Calendar →
+                            </a>
+                        ` : '')}
+
+                        <div class="calendar-export">
+                            <span class="export-label">Add to calendar:</span>
+                            <a href="${generateGoogleCalendarUrl(event)}" target="_blank" class="export-btn">
+                                📅 Google Calendar
+                            </a>
+                            <a href="${generateOutlookCalendarUrl(event)}" target="_blank" class="export-btn">
+                                📅 Outlook
+                            </a>
+                            <a href="javascript:void(0)" onclick='downloadICS(${JSON.stringify(event)})' class="export-btn">
+                                💾 Download ICS
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const paginationHTML = totalPages > 1 ? `
+                <div class="pagination">
+                    <button onclick="previousPage()" ${currentPage === 1 ? 'disabled' : ''}>
+                        ← Previous
+                    </button>
+                    <div class="pagination-info">
+                        Page ${currentPage} of ${totalPages}
+                    </div>
+                    <button onclick="nextPage()" ${currentPage === totalPages ? 'disabled' : ''}>
+                        Next →
+                    </button>
+                </div>
+            ` : '';
+
+            container.innerHTML = `
+                <div class="events-grid">${eventsHTML}</div>
+                ${paginationHTML}
+            `;
+
+            // Scroll to top of events
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                displayEvents();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayEvents();
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('sourceFilter').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            searchEvents();
+        }
+
+        function formatDateForCalendar(dateString) {
+            const date = new Date(dateString);
+            return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        }
+
+        function generateGoogleCalendarUrl(event) {
+            const startDate = formatDateForCalendar(event.start_time);
+            const endDate = event.end_time ? formatDateForCalendar(event.end_time) : startDate;
+            const title = encodeURIComponent(event.title || 'Event');
+            const details = encodeURIComponent(event.description || '');
+            const location = encodeURIComponent(event.location || '');
+            
+            return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDate}/${endDate}&details=${details}&location=${location}`;
+        }
+
+        function generateOutlookCalendarUrl(event) {
+            const startDate = new Date(event.start_time).toISOString();
+            const endDate = event.end_time ? new Date(event.end_time).toISOString() : startDate;
+            const title = encodeURIComponent(event.title || 'Event');
+            const details = encodeURIComponent(event.description || '');
+            const location = encodeURIComponent(event.location || '');
+            
+            return `https://outlook.live.com/calendar/0/deeplink/compose?subject=${title}&startdt=${startDate}&enddt=${endDate}&body=${details}&location=${location}`;
+        }
+
+        function downloadICS(event) {
+            const startDate = formatDateForCalendar(event.start_time);
+            const endDate = event.end_time ? formatDateForCalendar(event.end_time) : startDate;
+            const title = (event.title || 'Event').replace(/\n/g, '\\n');
+            const description = (event.description || '').replace(/\n/g, '\\n');
+            const location = (event.location || '').replace(/\n/g, '\\n');
+            
+            const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Yale Events//EN
+BEGIN:VEVENT
+UID:${event.id}@yaleevents
+DTSTAMP:${formatDateForCalendar(new Date().toISOString())}
+DTSTART:${startDate}
+DTEND:${endDate}
+SUMMARY:${title}
+DESCRIPTION:${description}
+LOCATION:${location}
+END:VEVENT
+END:VCALENDAR`;
+
+            const blob = new Blob([icsContent], { type: 'text/calendar' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${(event.title || 'event').replace(/[^a-z0-9]/gi, '_')}.ics`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Load events when page loads
+        window.addEventListener('DOMContentLoaded', loadEvents);
+    </script>
 </body>
 </html>

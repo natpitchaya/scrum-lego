@@ -3,7 +3,7 @@ services:
     name: yale-events-aggregator
     runtime: python
     buildCommand: "./build.sh"
-    startCommand: "cd backend && gunicorn backend.wsgi:application"
+    startCommand: "cd backend && gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT"
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.0
@@ -12,4 +12,4 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        sync: false
+        value: yale-events-aggregator.onrender.com,localhost,127.0.0.1
