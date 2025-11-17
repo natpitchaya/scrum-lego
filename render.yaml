@@ -8,8 +8,6 @@ services:
       - key: PYTHON_VERSION
         value: 3.12.0
       - key: DEBUG
-        value: False
+        value: "False"
       - key: SECRET_KEY
         generateValue: true
-      - key: ALLOWED_HOSTS
-        value: yale-events-aggregator.onrender.com,localhost,127.0.0.1

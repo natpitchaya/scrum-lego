@@ -7,14 +7,21 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-change-in-production')
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
+# DEBUG setting - defaults to False in production
+DEBUG = os.getenv('DEBUG', 'False').lower() in ['true', '1', 'yes']
 
 # Parse ALLOWED_HOSTS from environment variable
 allowed_hosts_str = os.getenv('ALLOWED_HOSTS', '')
 if allowed_hosts_str:
-    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(',')]
+    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(',') if host.strip()]
 else:
+    # Default hosts for development
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+# Allow Render.com domains in production
+if not DEBUG:
+    ALLOWED_HOSTS.extend(['.onrender.com'])
 
 INSTALLED_APPS = [
     'django.contrib.admin',

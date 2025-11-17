@@ -2,13 +2,7 @@
 
 ## Before Deploying
 
-1. **Update ALLOWED_HOSTS in render.yaml** (line 13):
-   ```yaml
-   value: YOUR-SERVICE-NAME.onrender.com,localhost,127.0.0.1
-   ```
-   Replace `YOUR-SERVICE-NAME` with your actual Render service name.
-
-2. **Commit and push to GitHub:**
+1. **Commit and push to GitHub:**
    ```bash
    git add .
    git commit -m "Ready for Render deployment"
@@ -26,13 +20,10 @@
 
 ## After Initial Deploy
 
-1. Note your service URL (e.g., `https://yale-events-aggregator.onrender.com`)
-2. Go to **Environment** tab in Render
-3. Update `ALLOWED_HOSTS` with your actual URL:
-   ```
-   yale-events-aggregator.onrender.com,localhost,127.0.0.1
-   ```
-4. Save and wait for automatic redeployment
+Wait for the deployment to complete. The app will automatically:
+- Allow all `.onrender.com` domains
+- Set `DEBUG=False` for production
+- Generate a secure `SECRET_KEY`
 
 ## Verify Deployment
 
