@@ -1,10 +1,13 @@
-from rest_framework import generics
+import io
+import random
 from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
+from django.core.management import call_command
+from rest_framework import generics
 from .models import Event, ABTestVisit
 from .serializers import EventSerializer
-import random
-import hashlib
 
 
 def events_home(request):
@@ -16,15 +19,6 @@ def search_events_page(request):
     """Render the search and filter page for events"""
     return render(request, 'search_events.html')
 
-
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework import generics
-from .models import Event
-from .serializers import EventSerializer
-from django.core.management import call_command
-import io
 
 def home(request):
     """Homepage with API documentation"""
@@ -49,26 +43,26 @@ def abtest_endpoint(request):
     # Ensure session exists
     if not request.session.session_key:
         request.session.create()
-    
+
     session_key = request.session.session_key
-    
+
     # Check if this session already has a variant assigned
     existing_visit = ABTestVisit.objects.filter(session_key=session_key).first()
-    
+
     if existing_visit:
         # Use existing variant for consistency
         variant = existing_visit.variant
     else:
         # Assign new variant (50/50 split)
         variant = 'A' if random.random() < 0.5 else 'B'
-        
+
         # Get client IP
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         if x_forwarded_for:
             ip_address = x_forwarded_for.split(',')[0]
         else:
             ip_address = request.META.get('REMOTE_ADDR')
-        
+
         # Record the visit
         ABTestVisit.objects.create(
             session_key=session_key,
@@ -76,20 +70,21 @@ def abtest_endpoint(request):
             ip_address=ip_address,
             user_agent=request.META.get('HTTP_USER_AGENT', '')
         )
-    
+
     # Set button text based on variant
     button_text = 'kudos' if variant == 'A' else 'thanks'
-    
+
     # Get total views count
     total_views = ABTestVisit.objects.count()
-    
+
     context = {
         'variant': f'Variant {variant}',
         'button_text': button_text,
         'total_views': total_views,
     }
-    
+
     return render(request, 'abtest_endpoint.html', context)
+
 
 @csrf_exempt
 def fetch_events_view(request):
@@ -111,7 +106,7 @@ def fetch_events_view(request):
                 'status': 'error',
                 'message': str(e)
             }, status=500)
-    
+
     # GET request - show current stats
     return JsonResponse({
         'event_count': Event.objects.count(),
@@ -120,32 +115,33 @@ def fetch_events_view(request):
         'message': 'Send POST request to /fetch/ to trigger event fetching'
     })
 
+
 class EventListView(generics.ListAPIView):
     serializer_class = EventSerializer
-    
+
     def get_queryset(self):
         queryset = Event.objects.all()
-        
+
         # Filter by source (organization)
         source = self.request.query_params.get('source', None)
         if source:
             queryset = queryset.filter(source=source)
-        
+
         # Filter by keyword search (in title and description)
         keyword = self.request.query_params.get('keyword', None)
         if keyword:
             queryset = queryset.filter(
-                Q(title__icontains=keyword) | 
-                Q(description__icontains=keyword)
+                Q(title__icontains=keyword)
+                | Q(description__icontains=keyword)
             )
-        
+
         # Filter by date range
         start_date = self.request.query_params.get('start_date', None)
         end_date = self.request.query_params.get('end_date', None)
-        
+
         if start_date:
             queryset = queryset.filter(start_time__gte=start_date)
         if end_date:
             queryset = queryset.filter(start_time__lte=end_date)
-        
+
         return queryset
