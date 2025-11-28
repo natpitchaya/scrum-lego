@@ -17,3 +17,18 @@ class Event(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.start_time.isoformat()})"
+
+
+class ABTestVisit(models.Model):
+    """Track A/B test visits and variant assignments"""
+    session_key = models.CharField(max_length=128, db_index=True)
+    variant = models.CharField(max_length=1, choices=[('A', 'Variant A'), ('B', 'Variant B')])
+    visited_at = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-visited_at']
+
+    def __str__(self):
+        return f"Variant {self.variant} - {self.visited_at.isoformat()}"

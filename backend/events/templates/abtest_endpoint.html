@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A/B Test - Team Swift Canyon</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .team-name {
+            color: #764ba2;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .members-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .member-item {
+            padding: 12px 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: #333;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .member-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        #abtest {
+            padding: 18px 50px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #abtest:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.5);
+        }
+
+        #abtest:active {
+            transform: translateY(-1px);
+        }
+
+        .variant-info {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .variant-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 A/B Test Page</h1>
+        <div class="team-name">Team: swift-canyon</div>
+
+        <div class="section">
+            <div class="section-title">👥 Team Members</div>
+            <ul class="members-list">
+                <li class="member-item">Nat Chairuengjitjaras</li>
+                <li class="member-item">Ted Wu</li>
+                <li class="member-item">Iris Yang</li>
+                <li class="member-item">Emily Yu</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🧪 A/B Test Button</div>
+            <div class="button-container">
+                <button id="abtest">{{ button_text }}</button>
+            </div>
+            <div class="variant-info">
+                You are seeing: <span class="variant-badge">{{ variant }}</span>
+                <br>
+                <small>This is a 50/50 A/B test. Refresh to see the randomization in action!</small>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📊 Session Stats</div>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-label">Total Views</div>
+                    <div class="stat-value">{{ total_views }}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Your Variant</div>
+                    <div class="stat-value">{{ variant }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Log the variant for analytics
+        console.log('A/B Test Variant:', '{{ variant }}');
+        console.log('Button Text:', '{{ button_text }}');
+        
+        // Add click handler for demonstration
+        document.getElementById('abtest').addEventListener('click', function() {
+            alert('Button clicked! Variant: {{ variant }}');
+        });
+    </script>
+</body>
+</html>

@@ -1,8 +1,10 @@
 from rest_framework import generics
 from django.shortcuts import render
 from django.db.models import Q
-from .models import Event
+from .models import Event, ABTestVisit
 from .serializers import EventSerializer
+import random
+import hashlib
 
 
 def events_home(request):
@@ -37,6 +39,57 @@ def ab_testing_page(request):
 def analytics_page(request):
     """Render the Google Analytics dashboard page"""
     return render(request, 'analytics.html')
+
+
+def abtest_endpoint(request):
+    """
+    A/B Test endpoint at /7232f7d (sha1 hash of 'swift-canyon')
+    Implements 50/50 split test with 'kudos' (Variant A) and 'thanks' (Variant B)
+    """
+    # Ensure session exists
+    if not request.session.session_key:
+        request.session.create()
+    
+    session_key = request.session.session_key
+    
+    # Check if this session already has a variant assigned
+    existing_visit = ABTestVisit.objects.filter(session_key=session_key).first()
+    
+    if existing_visit:
+        # Use existing variant for consistency
+        variant = existing_visit.variant
+    else:
+        # Assign new variant (50/50 split)
+        variant = 'A' if random.random() < 0.5 else 'B'
+        
+        # Get client IP
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip_address = x_forwarded_for.split(',')[0]
+        else:
+            ip_address = request.META.get('REMOTE_ADDR')
+        
+        # Record the visit
+        ABTestVisit.objects.create(
+            session_key=session_key,
+            variant=variant,
+            ip_address=ip_address,
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+    
+    # Set button text based on variant
+    button_text = 'kudos' if variant == 'A' else 'thanks'
+    
+    # Get total views count
+    total_views = ABTestVisit.objects.count()
+    
+    context = {
+        'variant': f'Variant {variant}',
+        'button_text': button_text,
+        'total_views': total_views,
+    }
+    
+    return render(request, 'abtest_endpoint.html', context)
 
 @csrf_exempt
 def fetch_events_view(request):
