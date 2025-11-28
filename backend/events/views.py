@@ -28,6 +28,16 @@ def home(request):
     """Homepage with API documentation"""
     return render(request, 'home.html')
 
+
+def ab_testing_page(request):
+    """Render the A/B testing dashboard page"""
+    return render(request, 'ab_testing.html')
+
+
+def analytics_page(request):
+    """Render the Google Analytics dashboard page"""
+    return render(request, 'analytics.html')
+
 @csrf_exempt
 def fetch_events_view(request):
     """Trigger event fetching manually via web interface"""

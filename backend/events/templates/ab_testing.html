@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A/B Testing - Yale Events Calendar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #00356b 0%, #286dc0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .nav a:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .nav a.active {
+            background: white;
+            color: #00356b;
+            font-weight: 600;
+        }
+
+        .content-box {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #00356b;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+        }
+
+        .test-variants {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .variant-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .variant-card:hover {
+            border-color: #00356b;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .variant-card.active {
+            border-color: #00356b;
+            background: #f0f8ff;
+        }
+
+        .variant-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #00356b;
+            margin-bottom: 15px;
+        }
+
+        .variant-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #00356b;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .control-panel {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #00356b;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #286dc0;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #00356b;
+            border: 2px solid #00356b;
+        }
+
+        .btn-secondary:hover {
+            background: #00356b;
+            color: white;
+        }
+
+        .test-info {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #00356b;
+            margin-bottom: 20px;
+        }
+
+        .test-info h3 {
+            color: #00356b;
+            margin-bottom: 10px;
+        }
+
+        .test-info p {
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-active {
+            background: #4caf50;
+            color: white;
+        }
+
+        .status-draft {
+            background: #ff9800;
+            color: white;
+        }
+
+        .status-completed {
+            background: #2196f3;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>A/B Testing Dashboard</h1>
+            <p class="subtitle">Experiment with different event display variations</p>
+        </header>
+
+        <nav class="nav">
+            <a href="/">Home</a>
+            <a href="/search/">Search Events</a>
+            <a href="/ab-testing/" class="active">A/B Testing</a>
+            <a href="/analytics/">Analytics</a>
+        </nav>
+
+        <div class="content-box">
+            <h2>Current Experiments</h2>
+            
+            <div class="test-section">
+                <div class="test-info">
+                    <h3>Test #1: Event Card Layout <span class="status-badge status-active">Active</span></h3>
+                    <p>Testing different event card layouts to determine which design leads to higher engagement rates and click-through rates.</p>
+                    <p><strong>Start Date:</strong> November 20, 2025 | <strong>Sample Size:</strong> 1,000 visitors</p>
+                </div>
+
+                <div class="test-variants">
+                    <div class="variant-card active">
+                        <div class="variant-title">Variant A (Control)</div>
+                        <div class="variant-description">
+                            Current layout with vertical card design, showing title, date, location, and description in a stacked format.
+                        </div>
+                        <div class="metrics">
+                            <div class="metric">
+                                <div class="metric-value">45%</div>
+                                <div class="metric-label">Click Rate</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">520</div>
+                                <div class="metric-label">Views</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">2.3m</div>
+                                <div class="metric-label">Avg. Time</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="variant-card">
+                        <div class="variant-title">Variant B</div>
+                        <div class="variant-description">
+                            Horizontal card layout with image on the left and information on the right, emphasizing visual content.
+                        </div>
+                        <div class="metrics">
+                            <div class="metric">
+                                <div class="metric-value">52%</div>
+                                <div class="metric-label">Click Rate</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">480</div>
+                                <div class="metric-label">Views</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">2.8m</div>
+                                <div class="metric-label">Avg. Time</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <div class="test-info">
+                    <h3>Test #2: Search Filter Position <span class="status-badge status-draft">Draft</span></h3>
+                    <p>Testing the placement of search filters to optimize user experience and filter usage.</p>
+                    <p><strong>Start Date:</strong> Not started | <strong>Sample Size:</strong> Target 1,500 visitors</p>
+                </div>
+
+                <div class="test-variants">
+                    <div class="variant-card">
+                        <div class="variant-title">Variant A (Control)</div>
+                        <div class="variant-description">
+                            Filters placed at the top of the page, above the search results.
+                        </div>
+                        <div class="metrics">
+                            <div class="metric">
+                                <div class="metric-value">--</div>
+                                <div class="metric-label">Filter Usage</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">--</div>
+                                <div class="metric-label">Views</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">--</div>
+                                <div class="metric-label">Avg. Time</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="variant-card">
+                        <div class="variant-title">Variant B</div>
+                        <div class="variant-description">
+                            Filters placed in a sidebar on the left, allowing more vertical space for results.
+                        </div>
+                        <div class="metrics">
+                            <div class="metric">
+                                <div class="metric-value">--</div>
+                                <div class="metric-label">Filter Usage</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">--</div>
+                                <div class="metric-label">Views</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">--</div>
+                                <div class="metric-label">Avg. Time</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <h3>Control Panel</h3>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="alert('Feature: Start a new A/B test')">Create New Test</button>
+                    <button class="btn-secondary" onclick="alert('Feature: Export test results')">Export Results</button>
+                    <button class="btn-secondary" onclick="alert('Feature: View detailed analytics')">View Details</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-box">
+            <h2>Past Experiments</h2>
+            <div class="test-info">
+                <h3>Test #0: Button Color Optimization <span class="status-badge status-completed">Completed</span></h3>
+                <p>Tested blue vs. green primary button colors. Result: Blue performed 18% better.</p>
+                <p><strong>Completed:</strong> November 15, 2025 | <strong>Winner:</strong> Variant A (Blue)</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
