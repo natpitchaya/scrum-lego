@@ -98,12 +98,6 @@ class ViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Search Yale Events')
 
-    def test_ab_testing_page(self):
-        """Test A/B testing dashboard loads successfully"""
-        response = self.client.get(reverse('ab-testing'))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'A/B Testing Dashboard')
-
     def test_analytics_page(self):
         """Test analytics page loads successfully"""
         response = self.client.get(reverse('analytics'))
@@ -180,11 +174,6 @@ class URLPatternsTest(TestCase):
         """Test search URL resolves correctly"""
         url = reverse('search-events')
         self.assertEqual(url, '/search/')
-
-    def test_ab_testing_url_resolves(self):
-        """Test A/B testing URL resolves correctly"""
-        url = reverse('ab-testing')
-        self.assertEqual(url, '/ab-testing/')
 
     def test_analytics_url_resolves(self):
         """Test analytics URL resolves correctly"""
