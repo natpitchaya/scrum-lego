@@ -415,6 +415,36 @@
         </div>
 
         <div class="content-box">
+            <h2>🧪 A/B Test Results (Internal Data)</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">{{ total_visits }}</div>
+                    <div class="stat-label">Total Visits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ visits_a }}</div>
+                    <div class="stat-label">Variant A (Kudos) Visits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ visits_b }}</div>
+                    <div class="stat-label">Variant B (Thanks) Visits</div>
+                </div>
+            </div>
+            <div class="stats-grid" style="margin-top: 20px;">
+                <div class="stat-card">
+                    <div class="stat-value">{{ conversions_a }}</div>
+                    <div class="stat-label">Variant A Clicks</div>
+                    <div class="stat-change">{{ conversion_rate_a }}% Conversion Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ conversions_b }}</div>
+                    <div class="stat-label">Variant B Clicks</div>
+                    <div class="stat-change">{{ conversion_rate_b }}% Conversion Rate</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-box">
             <h2>Top Performing Pages</h2>
             <div class="top-pages">
                 <div class="page-item">
@@ -444,9 +474,9 @@
                 <div class="page-item">
                     <div class="page-name">/7232f7d/ (A/B Test Endpoint)</div>
                     <div class="page-stats">
-                        <span><strong>1,210</strong> views</span>
-                        <span><strong>2:18</strong> avg. time</span>
-                        <span><strong>38%</strong> bounce rate</span>
+                        <span><strong>{{ total_visits }}</strong> views</span>
+                        <span><strong>--</strong> avg. time</span>
+                        <span><strong>--</strong> bounce rate</span>
                     </div>
                 </div>
                 <div class="page-item">

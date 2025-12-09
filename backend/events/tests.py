@@ -122,6 +122,21 @@ class ViewsTest(TestCase):
         self.assertContains(response, 'wandering-snail')
         self.assertContains(response, 'shy-tiger')
 
+    def test_abtest_endpoint_session_consistency(self):
+        """Test A/B test variant is consistent per session"""
+        # First request
+        response1 = self.client.get(reverse('abtest-endpoint'))
+        content1 = response1.content.decode()
+
+        # Second request with same session
+        response2 = self.client.get(reverse('abtest-endpoint'))
+        content2 = response2.content.decode()
+
+        # Check variant is the same
+        variant1 = 'kudos' if 'kudos' in content1 else 'thanks'
+        variant2 = 'kudos' if 'kudos' in content2 else 'thanks'
+        self.assertEqual(variant1, variant2)
+
     def test_event_list_api(self):
         """Test event list API endpoint"""
         response = self.client.get(reverse('event-list'))
@@ -153,6 +168,28 @@ class ViewsTest(TestCase):
         data = response.json()
         self.assertIn('event_count', data)
         self.assertEqual(data['event_count'], 2)
+
+    def test_record_click(self):
+        """Test recording a click"""
+        # 1. Visit the endpoint to create session and visit record
+        self.client.get(reverse('abtest-endpoint'))
+        session_key = self.client.session.session_key
+        
+        # 2. Post to record click
+        response = self.client.post(reverse('record-click'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['status'], 'success')
+        
+        # 3. Verify DB
+        # Note: Since we disabled session persistence in views.py for demo, 
+        # we might have multiple visits. We check if at least one is converted.
+        # Actually, record_click finds the visit by session_key.
+        # If session persistence is disabled, a new visit is created on every GET.
+        # But record_click uses the session_key which should persist across requests if the client handles cookies.
+        # The test client handles cookies.
+        
+        visit = ABTestVisit.objects.filter(session_key=session_key).first()
+        self.assertTrue(visit.converted)
 
 
 class URLPatternsTest(TestCase):

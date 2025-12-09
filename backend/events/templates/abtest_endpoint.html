@@ -211,8 +211,34 @@
         console.log('A/B Test Variant:', '{{ variant }}');
         console.log('Button Text:', '{{ button_text }}');
         
-        // Add click handler for demonstration
+        // Send impression event to GA
+        gtag('event', 'experiment_impression', {
+            'event_category': 'ab_test',
+            'event_label': '{{ variant }}',
+            'variant_id': '{{ variant }}'
+        });
+        
+        // Add click handler
         document.getElementById('abtest').addEventListener('click', function() {
+            // Send click event to GA
+            gtag('event', 'experiment_click', {
+                'event_category': 'ab_test',
+                'event_label': '{{ variant }}',
+                'variant_id': '{{ variant }}'
+            });
+            
+            // Record click internally
+            fetch('/api/record-click/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }).then(response => {
+                console.log('Click recorded internally');
+            }).catch(error => {
+                console.error('Error recording click:', error);
+            });
+
             alert('Button clicked! Variant: {{ variant }}');
         });
     </script>
