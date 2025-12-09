@@ -42,7 +42,9 @@ def abtest_endpoint(request):
     session_key = request.session.session_key
 
     # Check if this session already has a variant assigned
-    existing_visit = ABTestVisit.objects.filter(session_key=session_key).first()
+    # For demo purposes, we are disabling session persistence so you can see both variants
+    # existing_visit = ABTestVisit.objects.filter(session_key=session_key).first()
+    existing_visit = None
 
     if existing_visit:
         # Use existing variant for consistency

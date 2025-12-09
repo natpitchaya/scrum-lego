@@ -114,20 +114,13 @@ class ViewsTest(TestCase):
         content = response.content.decode()
         self.assertTrue('kudos' in content or 'thanks' in content)
 
-    def test_abtest_endpoint_session_consistency(self):
-        """Test A/B test variant is consistent per session"""
-        # First request
-        response1 = self.client.get(reverse('abtest-endpoint'))
-        content1 = response1.content.decode()
-
-        # Second request with same session
-        response2 = self.client.get(reverse('abtest-endpoint'))
-        content2 = response2.content.decode()
-
-        # Check variant is the same
-        variant1 = 'kudos' if 'kudos' in content1 else 'thanks'
-        variant2 = 'kudos' if 'kudos' in content2 else 'thanks'
-        self.assertEqual(variant1, variant2)
+    def test_abtest_endpoint_nicknames(self):
+        """Test A/B test endpoint shows team nicknames"""
+        response = self.client.get(reverse('abtest-endpoint'))
+        self.assertContains(response, 'sparkling deer')
+        self.assertContains(response, 'wild-cat')
+        self.assertContains(response, 'wandering-snail')
+        self.assertContains(response, 'shy-tiger')
 
     def test_event_list_api(self):
         """Test event list API endpoint"""
