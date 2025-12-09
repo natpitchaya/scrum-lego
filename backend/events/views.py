@@ -29,17 +29,17 @@ def analytics_page(request):
     """Render the Google Analytics dashboard page with internal A/B test stats"""
     # Calculate A/B test stats
     total_visits = ABTestVisit.objects.count()
-    
+
     # Variant A stats
     visits_a = ABTestVisit.objects.filter(variant='A').count()
     conversions_a = ABTestVisit.objects.filter(variant='A', converted=True).count()
     conversion_rate_a = (conversions_a / visits_a * 100) if visits_a > 0 else 0
-    
+
     # Variant B stats
     visits_b = ABTestVisit.objects.filter(variant='B').count()
     conversions_b = ABTestVisit.objects.filter(variant='B', converted=True).count()
     conversion_rate_b = (conversions_b / visits_b * 100) if visits_b > 0 else 0
-    
+
     context = {
         'total_visits': total_visits,
         'visits_a': visits_a,

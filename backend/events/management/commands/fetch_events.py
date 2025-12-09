@@ -110,7 +110,7 @@ def fetch_som_api(limit: int = 200):
         title = obj.get('p3') or obj.get('p1')
         dates_html = obj.get('p4') or ''
         date_text = BeautifulSoup(dates_html, 'html.parser').get_text(' ', strip=True) if dates_html else ''
-        
+
         # Parse start and end dates from the date_text
         start_dt = None
         end_dt = None
@@ -121,7 +121,7 @@ def fetch_som_api(limit: int = 200):
                 start_dt = parse_date(parts[0].strip())
             if len(parts) >= 2:
                 end_dt = parse_date(parts[1].strip())
-        
+
         loc = obj.get('p6') or ''
         rel = obj.get('p18') or ''
         url_full = requests.compat.urljoin(base, rel) if rel else None
@@ -129,12 +129,12 @@ def fetch_som_api(limit: int = 200):
         description = BeautifulSoup(description_html, 'html.parser').get_text(' ', strip=True) if description_html else ''
         uid = obj.get('p2') or make_uid(url_full or title or date_text)
         items.append({
-            'title': title, 
-            'url': url_full, 
-            'date_text': date_text, 
-            'source': 'Yale SOM', 
-            'description': description, 
-            'uid': uid, 
+            'title': title,
+            'url': url_full,
+            'date_text': date_text,
+            'source': 'Yale SOM',
+            'description': description,
+            'uid': uid,
             'location': loc,
             'start_dt': start_dt,
             'end_dt': end_dt
@@ -200,13 +200,13 @@ def fetch_yale_events_api(days: int = 365):
     resp = requests.get(url, timeout=15)
     resp.raise_for_status()
     data = resp.json()
-    
+
     for entry in data.get('events', []):
         evt = entry.get('event', {})
         title = evt.get('title', 'Untitled')
         description_html = evt.get('description', '')
         description = BeautifulSoup(description_html, 'html.parser').get_text(' ', strip=True) if description_html else evt.get('description_text', '')
-        
+
         # Get first event instance for date/time
         instances = evt.get('event_instances', [])
         start_dt = None
@@ -219,18 +219,18 @@ def fetch_yale_events_api(days: int = 365):
                 start_dt = parse_date(start_str)
             if end_str:
                 end_dt = parse_date(end_str)
-        
+
         # Location info
         location = evt.get('location_name', '') or evt.get('location', '')
         if evt.get('room_number'):
             location = f"{location}, {evt['room_number']}".strip(', ')
-        
+
         # URL
         event_url = evt.get('localist_url') or evt.get('url')
-        
+
         # UID
         uid = str(evt.get('id', '')) or make_uid(event_url or title)
-        
+
         items.append({
             'title': title,
             'url': event_url,
@@ -242,7 +242,7 @@ def fetch_yale_events_api(days: int = 365):
             'start_dt': start_dt,
             'end_dt': end_dt
         })
-    
+
     return items
 
 
@@ -254,58 +254,57 @@ def fetch_ysm():
     }
     resp = requests.get(url, timeout=15, headers=headers)
     resp.raise_for_status()
-    
+
     # Extract JSON from the embedded script tag
-    import json
     soup = BeautifulSoup(resp.text, 'html.parser')
     scripts = soup.find_all('script', string=re.compile('window\\[\'pageModel\'\\]'))
-    
+
     if not scripts:
         raise RuntimeError('Could not find embedded event data on YSM calendar page')
-    
+
     # Parse the JSON from the script tag
     script_content = scripts[0].string
     json_match = re.search(r'window\[\'pageModel\'\]\s*=\s*(\{.*?\});', script_content, re.DOTALL)
     if not json_match:
         raise RuntimeError('Could not extract JSON data from YSM calendar page')
-    
+
     data = json.loads(json_match.group(1))
-    
+
     items = []
     # Navigate to events in the JSON structure
     main_components = data.get('mainComponents', [])
     for component in main_components:
         if component.get('key') == 'EventsHome':
             events_data = component.get('model', {}).get('events', {}).get('collection', [])
-            
+
             for evt in events_data:
                 title = evt.get('title', 'Untitled')
                 subtitle = evt.get('subTitle', '')
                 if subtitle:
                     title = f"{title}: {subtitle}"
-                
+
                 description_html = evt.get('description', '')
                 description = BeautifulSoup(description_html, 'html.parser').get_text(' ', strip=True) if description_html else ''
-                
+
                 # Parse dates
                 start_str = evt.get('startDate')
                 end_str = evt.get('endDate')
                 start_dt = parse_date(start_str) if start_str else None
                 end_dt = parse_date(end_str) if end_str else None
-                
+
                 # Location info
                 event_location = evt.get('eventLocation', {}) or {}
                 location = event_location.get('building', '')
                 if event_location.get('streetAddress'):
                     location = f"{location}, {event_location['streetAddress']}".strip(', ')
-                
+
                 # URL
                 detail_url = evt.get('detailsEventUrl', '')
                 event_url = requests.compat.urljoin(url, detail_url) if detail_url else None
-                
+
                 # UID
                 uid = str(evt.get('id', '')) or make_uid(event_url or title)
-                
+
                 items.append({
                     'title': title,
                     'url': event_url,
@@ -317,7 +316,7 @@ def fetch_ysm():
                     'start_dt': start_dt,
                     'end_dt': end_dt
                 })
-    
+
     return items
 
 

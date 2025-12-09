@@ -174,20 +174,20 @@ class ViewsTest(TestCase):
         # 1. Visit the endpoint to create session and visit record
         self.client.get(reverse('abtest-endpoint'))
         session_key = self.client.session.session_key
-        
+
         # 2. Post to record click
         response = self.client.post(reverse('record-click'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['status'], 'success')
-        
+
         # 3. Verify DB
-        # Note: Since we disabled session persistence in views.py for demo, 
+        # Note: Since we disabled session persistence in views.py for demo,
         # we might have multiple visits. We check if at least one is converted.
         # Actually, record_click finds the visit by session_key.
         # If session persistence is disabled, a new visit is created on every GET.
         # But record_click uses the session_key which should persist across requests if the client handles cookies.
         # The test client handles cookies.
-        
+
         visit = ABTestVisit.objects.filter(session_key=session_key).first()
         self.assertTrue(visit.converted)
 
