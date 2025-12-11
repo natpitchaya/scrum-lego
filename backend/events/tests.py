@@ -98,12 +98,6 @@ class ViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Search Yale Events')
 
-    def test_ab_testing_page(self):
-        """Test A/B testing dashboard loads successfully"""
-        response = self.client.get(reverse('ab-testing'))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'A/B Testing Dashboard')
-
     def test_analytics_page(self):
         """Test analytics page loads successfully"""
         response = self.client.get(reverse('analytics'))
@@ -119,6 +113,14 @@ class ViewsTest(TestCase):
         # Check that button shows either kudos or thanks
         content = response.content.decode()
         self.assertTrue('kudos' in content or 'thanks' in content)
+
+    def test_abtest_endpoint_nicknames(self):
+        """Test A/B test endpoint shows team nicknames"""
+        response = self.client.get(reverse('abtest-endpoint'))
+        self.assertContains(response, 'sparkling deer')
+        self.assertContains(response, 'wild-cat')
+        self.assertContains(response, 'wandering-snail')
+        self.assertContains(response, 'shy-tiger')
 
     def test_abtest_endpoint_session_consistency(self):
         """Test A/B test variant is consistent per session"""
@@ -167,6 +169,28 @@ class ViewsTest(TestCase):
         self.assertIn('event_count', data)
         self.assertEqual(data['event_count'], 2)
 
+    def test_record_click(self):
+        """Test recording a click"""
+        # 1. Visit the endpoint to create session and visit record
+        self.client.get(reverse('abtest-endpoint'))
+        session_key = self.client.session.session_key
+
+        # 2. Post to record click
+        response = self.client.post(reverse('record-click'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['status'], 'success')
+
+        # 3. Verify DB
+        # Note: Since we disabled session persistence in views.py for demo,
+        # we might have multiple visits. We check if at least one is converted.
+        # Actually, record_click finds the visit by session_key.
+        # If session persistence is disabled, a new visit is created on every GET.
+        # But record_click uses the session_key which should persist across requests if the client handles cookies.
+        # The test client handles cookies.
+
+        visit = ABTestVisit.objects.filter(session_key=session_key).first()
+        self.assertTrue(visit.converted)
+
 
 class URLPatternsTest(TestCase):
     """Test URL patterns are correctly configured"""
@@ -180,11 +204,6 @@ class URLPatternsTest(TestCase):
         """Test search URL resolves correctly"""
         url = reverse('search-events')
         self.assertEqual(url, '/search/')
-
-    def test_ab_testing_url_resolves(self):
-        """Test A/B testing URL resolves correctly"""
-        url = reverse('ab-testing')
-        self.assertEqual(url, '/ab-testing/')
 
     def test_analytics_url_resolves(self):
         """Test analytics URL resolves correctly"""

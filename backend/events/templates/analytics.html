@@ -13,6 +13,7 @@
         gtag('js', new Date());
         gtag('config', 'G-WWESKXQCQY');
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -339,7 +340,7 @@
         <nav class="nav">
             <a href="/">Home</a>
             <a href="/search/">Search Events</a>
-            <a href="/ab-testing/">A/B Testing</a>
+            <a href="/7232f7d/">🧪 A/B Test</a>
             <a href="/analytics/" class="active">Analytics</a>
         </nav>
 
@@ -348,183 +349,102 @@
                 <h3>📊 Google Analytics Integration</h3>
                 <p>Google Analytics tracking is now active on this page!</p>
                 <p><strong>Your Tracking ID:</strong> <code>G-WWESKXQCQY</code></p>
-                <p>This dashboard displays sample data. For real-time data, integrate with the Google Analytics API.</p>
-            </div>
-
-            <div class="date-range">
-                <label>Date Range:</label>
-                <input type="date" id="start-date" value="2025-11-01">
-                <label>to</label>
-                <input type="date" id="end-date" value="2025-11-28">
-                <button onclick="updateAnalytics()">Update</button>
-                <button class="btn-secondary" onclick="setPreset('7days')">Last 7 Days</button>
-                <button class="btn-secondary" onclick="setPreset('30days')">Last 30 Days</button>
             </div>
         </div>
 
         <div class="content-box">
-            <h2>Key Metrics Overview</h2>
+            <h2>🧪 A/B Test Results (Internal Data)</h2>
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-value">12,458</div>
-                    <div class="stat-label">Total Page Views</div>
-                    <div class="stat-change positive">↑ 18.5% from last period</div>
+                    <div class="stat-value">{{ total_visits }}</div>
+                    <div class="stat-label">Total Visits</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">3,247</div>
-                    <div class="stat-label">Unique Visitors</div>
-                    <div class="stat-change positive">↑ 12.3% from last period</div>
+                    <div class="stat-value">{{ visits_a }}</div>
+                    <div class="stat-label">Variant A (Kudos) Visits</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">3.8</div>
-                    <div class="stat-label">Pages per Session</div>
-                    <div class="stat-change positive">↑ 5.2% from last period</div>
+                    <div class="stat-value">{{ visits_b }}</div>
+                    <div class="stat-label">Variant B (Thanks) Visits</div>
+                </div>
+            </div>
+            <div class="stats-grid" style="margin-top: 20px;">
+                <div class="stat-card">
+                    <div class="stat-value">{{ conversions_a }}</div>
+                    <div class="stat-label">Variant A Clicks</div>
+                    <div class="stat-change">{{ conversion_rate_a }}% Conversion Rate</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">2:34</div>
-                    <div class="stat-label">Avg. Session Duration</div>
-                    <div class="stat-change negative">↓ 3.1% from last period</div>
+                    <div class="stat-value">{{ conversions_b }}</div>
+                    <div class="stat-label">Variant B Clicks</div>
+                    <div class="stat-change">{{ conversion_rate_b }}% Conversion Rate</div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 20px; margin-top: 30px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 300px; height: 300px;">
+                    <canvas id="visitsChart"></canvas>
+                </div>
+                <div style="flex: 1; min-width: 300px; height: 300px;">
+                    <canvas id="conversionChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <div class="content-box">
-            <div class="chart-container">
-                <div class="chart-title">Page Views Over Time</div>
-                <div class="chart-placeholder">
-                    <svg viewBox="0 0 800 300">
-                        <polyline
-                            fill="none"
-                            stroke="#00356b"
-                            stroke-width="3"
-                            points="50,250 150,200 250,220 350,150 450,180 550,120 650,140 750,100"
-                        />
-                        <circle cx="50" cy="250" r="4" fill="#00356b"/>
-                        <circle cx="150" cy="200" r="4" fill="#00356b"/>
-                        <circle cx="250" cy="220" r="4" fill="#00356b"/>
-                        <circle cx="350" cy="150" r="4" fill="#00356b"/>
-                        <circle cx="450" cy="180" r="4" fill="#00356b"/>
-                        <circle cx="550" cy="120" r="4" fill="#00356b"/>
-                        <circle cx="650" cy="140" r="4" fill="#00356b"/>
-                        <circle cx="750" cy="100" r="4" fill="#00356b"/>
-                        <line x1="50" y1="270" x2="750" y2="270" stroke="#e0e0e0" stroke-width="2"/>
-                        <text x="400" y="290" text-anchor="middle" fill="#666" font-size="12">Nov 1 - Nov 28, 2025</text>
-                    </svg>
-                </div>
-            </div>
-        </div>
+        <script>
+            // Visits Pie Chart
+            const visitsCtx = document.getElementById('visitsChart').getContext('2d');
+            new Chart(visitsCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Variant A (Kudos)', 'Variant B (Thanks)'],
+                    datasets: [{
+                        data: [{{ visits_a }}, {{ visits_b }}],
+                        backgroundColor: ['#667eea', '#764ba2'],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Traffic Distribution'
+                        }
+                    }
+                }
+            });
 
-        <div class="content-box">
-            <h2>Top Performing Pages</h2>
-            <div class="top-pages">
-                <div class="page-item">
-                    <div class="page-name">/ (Home)</div>
-                    <div class="page-stats">
-                        <span><strong>4,523</strong> views</span>
-                        <span><strong>3:12</strong> avg. time</span>
-                        <span><strong>42%</strong> bounce rate</span>
-                    </div>
-                </div>
-                <div class="page-item">
-                    <div class="page-name">/search/ (Search Events)</div>
-                    <div class="page-stats">
-                        <span><strong>3,891</strong> views</span>
-                        <span><strong>4:25</strong> avg. time</span>
-                        <span><strong>28%</strong> bounce rate</span>
-                    </div>
-                </div>
-                <div class="page-item">
-                    <div class="page-name">/api/events/ (Event List API)</div>
-                    <div class="page-stats">
-                        <span><strong>2,134</strong> views</span>
-                        <span><strong>0:45</strong> avg. time</span>
-                        <span><strong>65%</strong> bounce rate</span>
-                    </div>
-                </div>
-                <div class="page-item">
-                    <div class="page-name">/ab-testing/ (A/B Testing)</div>
-                    <div class="page-stats">
-                        <span><strong>1,210</strong> views</span>
-                        <span><strong>2:18</strong> avg. time</span>
-                        <span><strong>38%</strong> bounce rate</span>
-                    </div>
-                </div>
-                <div class="page-item">
-                    <div class="page-name">/analytics/ (Analytics Dashboard)</div>
-                    <div class="page-stats">
-                        <span><strong>700</strong> views</span>
-                        <span><strong>1:52</strong> avg. time</span>
-                        <span><strong>45%</strong> bounce rate</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="content-box">
-            <h2>User Behavior Metrics</h2>
-            <table class="metrics-table">
-                <thead>
-                    <tr>
-                        <th>Metric</th>
-                        <th>Value</th>
-                        <th>Trend</th>
-                        <th>Performance</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Click-Through Rate</strong></td>
-                        <td>48.5%</td>
-                        <td style="color: #4caf50;">↑ 8.2%</td>
-                        <td>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 48.5%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>Event Detail Views</strong></td>
-                        <td>5,892</td>
-                        <td style="color: #4caf50;">↑ 15.3%</td>
-                        <td>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 72%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>Search Filter Usage</strong></td>
-                        <td>62.3%</td>
-                        <td style="color: #4caf50;">↑ 4.1%</td>
-                        <td>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 62.3%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>Mobile Users</strong></td>
-                        <td>38.7%</td>
-                        <td style="color: #f44336;">↓ 2.4%</td>
-                        <td>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 38.7%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>Return Visitors</strong></td>
-                        <td>24.8%</td>
-                        <td style="color: #4caf50;">↑ 6.7%</td>
-                        <td>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 24.8%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+            // Conversion Rate Bar Chart
+            const conversionCtx = document.getElementById('conversionChart').getContext('2d');
+            new Chart(conversionCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Variant A (Kudos)', 'Variant B (Thanks)'],
+                    datasets: [{
+                        label: 'Conversion Rate (%)',
+                        data: [{{ conversion_rate_a }}, {{ conversion_rate_b }}],
+                        backgroundColor: ['#667eea', '#764ba2'],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Conversion Rate Comparison'
+                        }
+                    }
+                }
+            });
+        </script>
 
         <div class="content-box">
             <h2>Export & Actions</h2>

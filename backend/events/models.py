@@ -26,6 +26,7 @@ class ABTestVisit(models.Model):
     visited_at = models.DateTimeField(auto_now_add=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True, null=True)
+    converted = models.BooleanField(default=False, help_text="Whether the user clicked the button")
 
     class Meta:
         ordering = ['-visited_at']

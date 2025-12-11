@@ -190,7 +190,7 @@ flake8 events/ backend/ --statistics --count
 
 4. **Deploy**
    - Render will automatically build and deploy
-   - Access your app at: `https://<your-app>.onrender.com`
+   - Access your app at: `https://yale-events-aggregator.onrender.com/`
 
 ### Post-Deployment
 
@@ -225,6 +225,9 @@ flake8 events/ backend/ --statistics --count
 ✅ **Logs**: Output to stdout (captured by Render)
 ✅ **Admin Processes**: Management commands via `manage.py`
 
+Note: 
+- Staging environment: https://yale-event-aggregator-staging.onrender.com 
+- Production environment: https://yale-events-aggregator.onrender.com/ 
 ## Configuration
 
 ### Environment Variables
@@ -281,9 +284,6 @@ Fetches latest events from Yale SOM and YSPH websites.
 5. Commit and push
 6. Create pull request
 
-## License
-
-MIT License
 
 ## Support
 

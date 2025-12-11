@@ -25,14 +25,46 @@ def home(request):
     return render(request, 'home.html')
 
 
-def ab_testing_page(request):
-    """Render the A/B testing dashboard page"""
-    return render(request, 'ab_testing.html')
-
-
 def analytics_page(request):
-    """Render the Google Analytics dashboard page"""
-    return render(request, 'analytics.html')
+    """Render the Google Analytics dashboard page with internal A/B test stats"""
+    # Calculate A/B test stats
+    total_visits = ABTestVisit.objects.count()
+
+    # Variant A stats
+    visits_a = ABTestVisit.objects.filter(variant='A').count()
+    conversions_a = ABTestVisit.objects.filter(variant='A', converted=True).count()
+    conversion_rate_a = (conversions_a / visits_a * 100) if visits_a > 0 else 0
+
+    # Variant B stats
+    visits_b = ABTestVisit.objects.filter(variant='B').count()
+    conversions_b = ABTestVisit.objects.filter(variant='B', converted=True).count()
+    conversion_rate_b = (conversions_b / visits_b * 100) if visits_b > 0 else 0
+
+    context = {
+        'total_visits': total_visits,
+        'visits_a': visits_a,
+        'conversions_a': conversions_a,
+        'conversion_rate_a': round(conversion_rate_a, 1),
+        'visits_b': visits_b,
+        'conversions_b': conversions_b,
+        'conversion_rate_b': round(conversion_rate_b, 1),
+    }
+    return render(request, 'analytics.html', context)
+
+
+@csrf_exempt
+def record_click(request):
+    """Record a button click for the A/B test"""
+    if request.method == 'POST':
+        session_key = request.session.session_key
+        if session_key:
+            # Find the most recent visit for this session
+            visit = ABTestVisit.objects.filter(session_key=session_key).first()
+            if visit:
+                visit.converted = True
+                visit.save()
+                return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
 
 
 def abtest_endpoint(request):
