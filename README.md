@@ -108,10 +108,8 @@ scrum-lego/
    ```
 
 9. **Access the application**
-   - Home: http://localhost:8000/
-   - API: http://localhost:8000/api/events/
-   - A/B Test: http://localhost:8000/7232f7d/
-   - Admin: http://localhost:8000/admin/
+   - Home: [https://yale-events-aggregator.onrender.com]
+   - A/B Test: [https://yale-events-aggregator.onrender.com/7232f7d]
 
 ## Testing
 
@@ -169,15 +167,6 @@ flake8 events/ backend/ --statistics --count
    git commit -m "Deployment ready"
    git push origin main
    ```
-
-2. **Configure Render**
-   - Go to [Render Dashboard](https://dashboard.render.com)
-   - Create a new Web Service
-   - Connect your GitHub repository
-   - Use the following settings:
-     - **Build Command**: `./build.sh`
-     - **Start Command**: `cd backend && gunicorn backend.wsgi:application`
-     - **Environment**: Python 3.12
 
 3. **Set Environment Variables** (in Render dashboard)
    ```
